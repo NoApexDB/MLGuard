@@ -42,3 +42,25 @@ def _load_csv(path: Path) -> pd.DataFrame:
 @register_loader(".parquet")
 def _load_parquet(path: Path) -> pd.DataFrame:
     return pd.read_parquet(path)
+
+
+@register_loader(".json")
+def _load_json(path: Path) -> pd.DataFrame:
+    try:
+        return pd.read_json(path)
+    except Exception:
+        return pd.read_json(path, lines=True)
+
+
+@register_loader(".jsonl")
+def _load_jsonl(path: Path) -> pd.DataFrame:
+    return pd.read_json(path, lines=True)
+
+
+@register_loader(".xlsx", ".xls")
+def _load_excel(path: Path) -> pd.DataFrame:
+    try:
+        return pd.read_excel(path)
+    except ImportError:
+        raise click.ClickException("Для чтения Excel (.xlsx/.xls) требуется openpyxl: pip install openpyxl")
+

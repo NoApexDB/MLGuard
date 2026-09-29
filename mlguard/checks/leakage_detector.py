@@ -12,7 +12,6 @@ def check_correlation_leakage(
     numeric_cols = list(numeric_df.columns)
 
     if len(numeric_cols) >= 2:
-        # 1. Утечка целевой переменной в признаки (target leakage)
         if target_col is not None and target_col in numeric_df.columns:
             for col in numeric_cols:
                 if col == target_col:
@@ -31,26 +30,25 @@ def check_correlation_leakage(
                         "threshold": threshold,
                         "message": f"Feature '{col}' has {corr_type} correlation of {corr_value:.4f} with target '{target_col}'."
                     })
+        else:
+            for i in range(len(numeric_cols)):
+                for j in range(i + 1, len(numeric_cols)):
+                    col1 = numeric_cols[i]
+                    col2 = numeric_cols[j]
+                    
+                    p_corr = abs(numeric_df[col1].corr(numeric_df[col2], method='pearson'))
+                    s_corr = abs(numeric_df[col1].corr(numeric_df[col2], method='spearman'))
+                    corr_value = max(p_corr, s_corr)
+                    if corr_value > threshold:
+                        findings.append({
+                            "check": "leakage_detector",
+                            "severity": "WARNING",
+                            "column": f"{col1} vs {col2}",
+                            "metric_value": round(float(corr_value), 4),
+                            "threshold": threshold,
+                            "message": f"High correlation ({corr_value:.4f}) detected between '{col1}' and '{col2}'."
+                        })
 
-        # 2. Мультиколлинеарность между признаками (feature vs feature)
-        feat_cols = [c for c in numeric_cols if c != target_col]
-        for i in range(len(feat_cols)):
-            for j in range(i + 1, len(feat_cols)):
-                col1 = feat_cols[i]
-                col2 = feat_cols[j]
-                
-                p_corr = abs(numeric_df[col1].corr(numeric_df[col2], method='pearson'))
-                s_corr = abs(numeric_df[col1].corr(numeric_df[col2], method='spearman'))
-                corr_value = max(p_corr, s_corr)
-                if corr_value > threshold:
-                    findings.append({
-                        "check": "leakage_detector",
-                        "severity": "WARNING",
-                        "column": f"{col1} vs {col2}",
-                        "metric_value": round(float(corr_value), 4),
-                        "threshold": threshold,
-                        "message": f"High correlation ({corr_value:.4f}) detected between '{col1}' and '{col2}'."
-                    })
 
 
     # Проверка колонок-идентификаторов (ID/UUID), ведущих к переобучению/утечке

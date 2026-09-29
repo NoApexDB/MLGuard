@@ -10,9 +10,9 @@
 
 ## Что делает проект
 
-MLGuard — это CLI-инструмент и библиотека, которая проверяет табличные данные (`.csv`, `.parquet`) на набор типовых математических и методологических ошибок, из-за которых предиктивная аналитика и ML-модели дают ложную уверенность в результатах.
+MLGuard — это CLI-инструмент и Python-библиотека для проверки табличных данных (`.csv`, `.parquet`, `.json`, `.jsonl`, `.xlsx`) на типовые математические и методологические ошибки, из-за которых предиктивная аналитика и ML-модели дают ложную уверенность в результатах.
 
-В библиотеке реализовано 5 автономных проверок:
+В библиотеке реализовано 7 автономных проверок:
 
 | Проверка | Что ищет | Математический аппарат |
 |---|---|---|
@@ -21,8 +21,11 @@ MLGuard — это CLI-инструмент и библиотека, котор�
 | `churn_blindness` | Survivorship Bias — сдвиг распределения между группами | Тест Колмогорова-Смирнова (`ks_2samp`) для чисел, $\chi^2$ и $V$ Крамера для категорий |
 | `metric_confusion` | Расхождение метрики привлечения и метрики здоровья бизнеса | Тест Манна-Кендалла на тренд (`kendalltau`) с порогом силы тренда и ранжированием |
 | `seasonality_sentiment` | Сезонность, маскирующая реальный тренд в данных | STL-декомпозиция ряда на Trend, Seasonal, Residual |
+| `hidden_missing` | Маскированные пропуски данных | Детекция псевдо-пропусков (`?`, `null`, `none`, `-999`, `inf`) |
+| `temporal_leakage` | Временное заглядывание в будущее (Lookahead) | Сверка временных меток признаков и корреляция с будущим таргетом $y[t+1]$ |
 
 ---
+
 
 ## Валидация на синтетических данных
 
@@ -83,21 +86,48 @@ mlguard audit data.csv --target churn --time-col created_at
 Итого: 3 findings — 2 critical, 1 warning.
 ```
 
-### Основные команды
+### Основные команды CLI
 
 ```bash
 mlguard checks list                                  # список доступных проверок
+mlguard audit data.csv --format html -o report.html  # интерактивный HTML-отчёт
 mlguard audit data.csv --format json -o report.json  # отчёт в формате JSON
-mlguard audit data.csv --format markdown              # отчёт в формате Markdown
+mlguard audit data.csv --format markdown             # отчёт в формате Markdown
 mlguard audit data.csv --only leakage_detector,churn_blindness
-mlguard audit data.csv --fail-on WARNING              # gate для CI/CD: exit code 1 при находках >= WARNING
+mlguard audit data.csv --fail-on WARNING             # gate для CI/CD: exit code 1 при находках >= WARNING
+```
+
+### Использование как Python-библиотека (в скриптах и Jupyter)
+
+```python
+import mlguard
+import pandas as pd
+
+# 1. Аудит напрямую из файла (csv, parquet, json, jsonl, xlsx)
+report = mlguard.audit("data.csv", target_col="churn", time_col="created_at")
+
+# 2. Аудит из pandas DataFrame
+df = pd.read_csv("train.csv")
+report = mlguard.audit(df, target_col="Survived")
+
+# Вывод в терминал или Jupyter (автоматический HTML-рендер)
+print(report)
+
+# Экспорт результатов
+df_findings = report.to_dataframe()
+html_code = report.to_html()
+json_str = report.to_json()
+
+if report.has_critical():
+    print("Внимание! Обнаружены критические ошибки методологии.")
 ```
 
 ---
 
 ## Автор и поддержка
 
-Учебный и коммерческий проект, разработанный в процессе подготовки к отбору в Т-Академию (Т-Банк). Цель — довести идею от математической концепции до работающего инструмента: 5 статистических проверок, CLI, конфигурация, готовность к CI/CD.
+Проект разработан для предиктивной аналитики и валидации данных перед обучением ML-моделей: 7 статистических проверок, CLI, Python API, HTML-отчёты, интеграция с CI/CD.
+
 
 * **Автор**: [Рамиль Чернов](https://github.com/chernov-ramil-machinelearning)
 * **Telegram**: [@NoApexDB](https://t.me/NoApexDB)

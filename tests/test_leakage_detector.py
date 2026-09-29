@@ -51,10 +51,11 @@ def test_leakage_detector_catches_feature_multicollinearity():
         "target": target
     })
 
-    findings = check_correlation_leakage(df, target_col="target", threshold=0.95)
+    findings = check_correlation_leakage(df, threshold=0.95)
     multicol_findings = [f for f in findings if f["severity"] == "WARNING"]
     assert len(multicol_findings) == 1
     assert "feat1 vs feat2" in multicol_findings[0]["column"]
+
 
 
 def test_leakage_detector_catches_unique_id():

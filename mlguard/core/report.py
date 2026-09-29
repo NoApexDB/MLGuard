@@ -61,6 +61,78 @@ def format_markdown(findings: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def format_html(findings: list[dict]) -> str:
+    critical = sum(1 for f in findings if str(f.get("severity", "")).upper() == "CRITICAL")
+    warning = sum(1 for f in findings if str(f.get("severity", "")).upper() == "WARNING")
+    total = len(findings)
+
+    rows = []
+    for f in findings:
+        sev = str(f.get("severity", "INFO")).upper()
+        color = "#e53e3e" if sev == "CRITICAL" else ("#dd6b20" if sev == "WARNING" else "#3182ce")
+        bg_color = "#fff5f5" if sev == "CRITICAL" else ("#fffaf0" if sev == "WARNING" else "#ebf8ff")
+        rows.append(f"""
+        <tr>
+            <td><span style="background:{bg_color}; color:{color}; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">{sev}</span></td>
+            <td><code>{f.get('check', '')}</code></td>
+            <td><b>{f.get('column', '')}</b></td>
+            <td>{f.get('metric_value', '')}</td>
+            <td>{f.get('threshold', '')}</td>
+            <td>{f.get('message', '')}</td>
+        </tr>""")
+
+    tbody = "\n".join(rows) if rows else "<tr><td colspan='6' style='text-align:center; padding:20px; color:#38a169;'><b>✓ Проблем не найдено</b></td></tr>"
+
+    return f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>MLGuard Audit Report</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f7fafc; color: #2d3748; margin: 0; padding: 30px; }}
+        .container {{ max-width: 1100px; margin: 0 auto; background: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 30px; }}
+        h1 {{ margin-top: 0; color: #1a202c; display: flex; align-items: center; gap: 10px; }}
+        .stats {{ display: flex; gap: 20px; margin: 25px 0; }}
+        .stat-card {{ flex: 1; padding: 15px 20px; border-radius: 6px; background: #edf2f7; }}
+        .stat-card.critical {{ background: #fed7d7; color: #9b2c2c; }}
+        .stat-card.warning {{ background: #feebc8; color: #9c4221; }}
+        .stat-card.total {{ background: #e2e8f0; color: #2d3748; }}
+        .stat-number {{ font-size: 28px; font-weight: 700; margin-top: 5px; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+        th, td {{ padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }}
+        th {{ background: #f8fafc; font-weight: 600; color: #4a5568; }}
+        tr:hover {{ background: #f8fafc; }}
+        code {{ background: #edf2f7; padding: 2px 5px; border-radius: 3px; font-size: 13px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ MLGuard Audit Report</h1>
+        <div class="stats">
+            <div class="stat-card total"><div>Всего находок</div><div class="stat-number">{total}</div></div>
+            <div class="stat-card critical"><div>Критические</div><div class="stat-number">{critical}</div></div>
+            <div class="stat-card warning"><div>Предупреждения</div><div class="stat-number">{warning}</div></div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Уровень</th>
+                    <th>Проверка</th>
+                    <th>Колонка</th>
+                    <th>Значение</th>
+                    <th>Порог</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody>
+                {tbody}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>"""
+
+
 def _summary_line(findings: list[dict], markdown: bool = False) -> str:
     critical = sum(1 for f in findings if str(f.get("severity", "")).upper() == "CRITICAL")
     warning = sum(1 for f in findings if str(f.get("severity", "")).upper() == "WARNING")
@@ -72,4 +144,6 @@ FORMATTERS = {
     "table": format_table,
     "json": format_json,
     "markdown": format_markdown,
+    "html": format_html,
 }
+

@@ -24,12 +24,15 @@ SEVERITY_ORDER = ["INFO", "WARNING", "CRITICAL"]
 # в findings, а не с именами файлов — они, как видно на small_sample_guard,
 # могут расходиться).
 CHECK_REGISTRY = {
-    "leakage_detector": "Data Leakage Guard — корреляционные и временные утечки таргета",
+    "leakage_detector": "Data Leakage Guard — корреляционные и мультиколлинеарные утечки",
     "small_sample_guard": "Small Sample & Statistical Power — размер выборки, bootstrap CI",
-    "churn_blindness": "Survivorship Bias Detector — KS-test между активными и ушедшими клиентами",
+    "churn_blindness": "Survivorship Bias Detector — сдвиг распределений между группами исходов",
     "metric_confusion": "Vanity Metrics Detector — расхождение трендов метрик (Mann-Kendall)",
     "seasonality_sentiment": "Seasonality & Trend Leak — STL-декомпозиция, сезонность",
+    "hidden_missing": "Hidden Missing Values — маскированные пропуски ('?', '-999', inf)",
+    "temporal_leakage": "Temporal Lookahead Guard — заглядывание в будущее и опережающие события",
 }
+
 
 
 def _severity_rank(severity: str) -> int:
