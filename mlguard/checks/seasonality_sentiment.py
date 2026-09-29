@@ -25,9 +25,13 @@ def check_seasonality(
         return findings
 
     df_copy = df.copy()
-    df_copy[time_col] = pd.to_datetime(df_copy[time_col])
+    df_copy[time_col] = pd.to_datetime(df_copy[time_col], errors='coerce')
+    df_copy = df_copy.dropna(subset=[time_col])
+    if len(df_copy) < 30:
+        return findings
+
     df_sorted = df_copy.sort_values(by=time_col).set_index(time_col)
-    df_resampled = df_sorted.resample('D').mean().ffill()
+    df_resampled = df_sorted.resample('D').mean(numeric_only=True).ffill().bfill()
 
     # Сканируем все числовые колонки (признаки), исключая сам целевой класс
     numeric_cols = [c for c in df_resampled.select_dtypes(include='number').columns if c != target_col]

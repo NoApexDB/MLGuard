@@ -66,3 +66,5 @@ venv.bak/
 # Project specific temporary files
 sample_leakage.csv
 *.db
+SESSION.md
+

@@ -22,7 +22,8 @@ def check_sample_size(
 
     target_cols_to_check = []
     if target_col is not None and target_col in df.columns:
-        target_cols_to_check.append(target_col)
+        if df[target_col].nunique() <= 10 or pd.api.types.is_bool_dtype(df[target_col]) or pd.api.types.is_object_dtype(df[target_col]):
+            target_cols_to_check.append(target_col)
     else:
         target_cols_to_check = [c for c in df.columns if df[c].nunique() <= 10]
 
@@ -42,22 +43,31 @@ def check_sample_size(
     eval_col = target_col if (target_col in num_cols) else (num_cols[0] if len(num_cols) > 0 else None)
 
     if eval_col is not None:
-        for _ in range(1000):
-            sample = np.random.choice(df[eval_col], size=len(df), replace=True)
-            bootstrap_means.append(sample.mean())
+        col_series = df[eval_col].dropna()
+        if len(col_series) > 1:
+            col_std = float(col_series.std())
+            col_data = col_series.to_numpy()
+            n = len(col_data)
 
-        p_97 = np.percentile(bootstrap_means, 97.5)
-        p_2 = np.percentile(bootstrap_means, 2.5)
-        difference = p_97 - p_2
+            for _ in range(1000):
+                sample = np.random.choice(col_data, size=n, replace=True)
+                bootstrap_means.append(sample.mean())
 
-        if difference > 0.20:
-            findings.append({
-                "check": "small_sample_guard",
-                "severity": "CRITICAL",
-                "column": eval_col,
-                "metric_value": round(float(difference), 4),
-                "threshold": 0.20,
-                "message": f"High uncertainty for '{eval_col}': 95% CI [{p_2:.3f}, {p_97:.3f}], width {difference:.3f}."
-            })
+            p_97 = np.percentile(bootstrap_means, 97.5)
+            p_2 = np.percentile(bootstrap_means, 2.5)
+            ci_width = float(p_97 - p_2)
+
+            # Относительная ширина ДИ к стандартному отклонению (инвариантна к масштабу единиц)
+            norm_width = (ci_width / col_std) if col_std > 1e-9 else 0.0
+
+            if norm_width > 0.20:
+                findings.append({
+                    "check": "small_sample_guard",
+                    "severity": "CRITICAL",
+                    "column": eval_col,
+                    "metric_value": round(float(norm_width), 4),
+                    "threshold": 0.20,
+                    "message": f"High uncertainty for '{eval_col}': 95% CI [{p_2:.3f}, {p_97:.3f}], relative width {norm_width:.3f}."
+                })
 
     return findings

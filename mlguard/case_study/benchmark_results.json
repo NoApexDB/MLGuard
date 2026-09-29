@@ -1,143 +1,47 @@
 {
-  "12000": {
-    "leakage_detector": {
-      "TP": 20,
-      "FP": 0,
-      "FN": 0,
-      "TN": 80,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "small_sample_guard": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "churn_blindness": {
-      "TP": 20,
-      "FP": 1,
-      "FN": 0,
-      "TN": 79,
-      "Precision": 0.9524,
-      "Recall": 1.0,
-      "F1": 0.9756
-    },
-    "metric_confusion": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "seasonality_sentiment": {
-      "TP": 10,
-      "FP": 1,
-      "FN": 0,
-      "TN": 89,
-      "Precision": 0.9091,
-      "Recall": 1.0,
-      "F1": 0.9524
-    }
+  "leakage_detector": {
+    "TP": 20,
+    "FP": 0,
+    "FN": 0,
+    "TN": 80,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
   },
-  "15000": {
-    "leakage_detector": {
-      "TP": 20,
-      "FP": 0,
-      "FN": 0,
-      "TN": 80,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "small_sample_guard": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "churn_blindness": {
-      "TP": 20,
-      "FP": 1,
-      "FN": 0,
-      "TN": 79,
-      "Precision": 0.9524,
-      "Recall": 1.0,
-      "F1": 0.9756
-    },
-    "metric_confusion": {
-      "TP": 10,
-      "FP": 2,
-      "FN": 0,
-      "TN": 88,
-      "Precision": 0.8333,
-      "Recall": 1.0,
-      "F1": 0.9091
-    },
-    "seasonality_sentiment": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    }
+  "small_sample_guard": {
+    "TP": 10,
+    "FP": 0,
+    "FN": 0,
+    "TN": 90,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
   },
-  "20000": {
-    "leakage_detector": {
-      "TP": 20,
-      "FP": 0,
-      "FN": 0,
-      "TN": 80,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "small_sample_guard": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "churn_blindness": {
-      "TP": 20,
-      "FP": 1,
-      "FN": 0,
-      "TN": 79,
-      "Precision": 0.9524,
-      "Recall": 1.0,
-      "F1": 0.9756
-    },
-    "metric_confusion": {
-      "TP": 10,
-      "FP": 0,
-      "FN": 0,
-      "TN": 90,
-      "Precision": 1.0,
-      "Recall": 1.0,
-      "F1": 1.0
-    },
-    "seasonality_sentiment": {
-      "TP": 10,
-      "FP": 3,
-      "FN": 0,
-      "TN": 87,
-      "Precision": 0.7692,
-      "Recall": 1.0,
-      "F1": 0.8696
-    }
+  "churn_blindness": {
+    "TP": 20,
+    "FP": 0,
+    "FN": 0,
+    "TN": 80,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
+  },
+  "metric_confusion": {
+    "TP": 10,
+    "FP": 0,
+    "FN": 0,
+    "TN": 90,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
+  },
+  "seasonality_sentiment": {
+    "TP": 10,
+    "FP": 2,
+    "FN": 0,
+    "TN": 88,
+    "Precision": 0.8333,
+    "Recall": 1.0,
+    "F1": 0.9091
   }
 }

@@ -1,7 +1,8 @@
 [project]
 name = "mlguard"
-version = "0.1.0"
+version = "0.2.0"
 description = "Линтер для предиктивной аналитики бизнеса: находит методологические и статистические ловушки в данных до того, как они попадут в прод."
+
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
