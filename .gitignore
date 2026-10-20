@@ -68,3 +68,13 @@ sample_leakage.csv
 *.db
 SESSION.md
 
+
+report.html
+report.json
+
+# Competition materials
+DEFENSE_SPEECH_AND_FAQ.md
+JURY_BRIEF_NOBEL_KSTU.md
+PROJECT_PASSPORT_KSTU.md
+RESEARCH_PAPER_MLGUARD.md
+TECHNICAL_AUDIT_REPORT.md
