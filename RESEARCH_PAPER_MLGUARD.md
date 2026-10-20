@@ -1,4 +1,4 @@
-# НАУЧНО-ИССЛЕДОВАТЕЛЬСКАЯ РАБОТА
+﻿# НАУЧНО-ИССЛЕДОВАТЕЛЬСКАЯ РАБОТА
 
 **Тема:** «MLGuard: Программно-математический комплекс автоматизированного статического аудита табличных данных и валидации предиктивных моделей»  
 **Конкурс:** XIX Конкурс научно-исследовательских и творческих работ «Нобелевские надежды КНИТУ – 2027»  
@@ -221,4 +221,4 @@ $$\text{Seasonal\_Strength} = \frac{\mathrm{Var}(S_t)}{\mathrm{Var}(Y_t)}$$
 5. Cleveland, R. B., Cleveland, W. S., McRae, J. E., & Terpenning, I. (1990). *STL: A seasonal-trend decomposition procedure based on Loess*. Journal of Official Statistics, 6(1), 3-73.
 6. Cramer, H. (1999). *Mathematical Methods of Statistics*. Princeton University Press.
 7. Breiman, L. (2001). *Statistical modeling: The two cultures*. Statistical Science, 16(3), 199-231.
-8. Документация проекта MLGuard: `https://github.com/chernov-ramil-machinelearning/MLGuard`.
+8. Документация проекта MLGuard: `https://github.com/NoApexDB/MLGuard`.

@@ -2,7 +2,7 @@
 
 > Линтер для предиктивной аналитики бизнеса — находит методологические и статистические ловушки в данных без вреда продакшену.
 
-[![CI](https://github.com/chernov-ramil-machinelearning/MLGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/chernov-ramil-machinelearning/MLGuard/actions)
+[![CI](https://github.com/NoApexDB/MLGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/NoApexDB/MLGuard/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 
@@ -63,7 +63,7 @@ MLGuard — это CLI-инструмент и Python-библиотека дл�
 ### Установка
 
 ```bash
-git clone https://github.com/chernov-ramil-machinelearning/MLGuard.git
+git clone https://github.com/NoApexDB/MLGuard.git
 cd MLGuard
 pip install -e .
 ```
@@ -129,7 +129,7 @@ if report.has_critical():
 Проект разработан для предиктивной аналитики и валидации данных перед обучением ML-моделей: 7 статистических проверок, CLI, Python API, HTML-отчёты, интеграция с CI/CD.
 
 
-* **Автор**: [Рамиль Чернов](https://github.com/chernov-ramil-machinelearning)
+* **Автор**: [Рамиль Чернов](https://github.com/NoApexDB)
 * **Telegram**: [@NoApexDB](https://t.me/NoApexDB)
 
 ## Лицензия
