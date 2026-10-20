@@ -5,6 +5,7 @@ MLGuard — линтер для предиктивной аналитики би
 from pathlib import Path
 import pandas as pd
 
+from mlguard.core.domain import Finding, Severity, CheckProtocol
 from mlguard.core.loaders import load_data, register_loader
 from mlguard.core.report import format_html, format_json, format_markdown, format_table
 from mlguard.core.runner import run_audit
@@ -96,6 +97,9 @@ def audit(
 __all__ = [
     "audit",
     "AuditReport",
+    "Finding",
+    "Severity",
+    "CheckProtocol",
     "load_data",
     "register_loader",
     "run_audit",

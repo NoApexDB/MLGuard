@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from mlguard.core.domain import Finding, Severity
 
 
 def check_temporal_leakage(
@@ -7,13 +8,13 @@ def check_temporal_leakage(
     time_col: str = None, 
     target_col: str = None,
     threshold_corr: float = 0.90
-) -> list[dict]:
+) -> list[Finding]:
     """
     Детектирует временные утечки (Temporal Lookahead):
     1. Наличие временных меток признаков позже времени среза таргета (feature_time > target_time).
     2. Признаки, заглядывающие в будущее: корреляция фичи X[t] с будущим таргетом y[t+1] превышает порог.
     """
-    findings = []
+    findings: list[Finding] = []
 
     # Определяем time_col, если не указан явно
     if time_col is None:
@@ -43,7 +44,7 @@ def check_temporal_leakage(
     for col in df.columns:
         if col == time_col:
             continue
-        col_lower = col.lower()
+        col_lower = str(col).lower()
         if 'date' in col_lower or 'time' in col_lower or 'timestamp' in col_lower or pd.api.types.is_datetime64_any_dtype(df[col]):
             try:
                 t_other = pd.to_datetime(df[col], errors='coerce')
@@ -51,14 +52,14 @@ def check_temporal_leakage(
                 future_diff = t_other[valid_mask] - t_base[valid_mask]
                 future_count = int((future_diff > pd.Timedelta(0)).sum())
                 if future_count > 0:
-                    findings.append({
-                        "check": "temporal_leakage",
-                        "severity": "CRITICAL",
-                        "column": col,
-                        "metric_value": future_count,
-                        "threshold": 0,
-                        "message": f"Future timestamps detected in '{col}': {future_count} records occur after base time '{time_col}'. Direct lookahead leak."
-                    })
+                    findings.append(Finding(
+                        check="temporal_leakage",
+                        severity=Severity.CRITICAL,
+                        column=col,
+                        metric_value=float(future_count),
+                        threshold=0.0,
+                        message=f"Future timestamps detected in '{col}': {future_count} records occur after base time '{time_col}'. Direct lookahead leak."
+                    ))
             except Exception:
                 pass
 
@@ -75,13 +76,13 @@ def check_temporal_leakage(
             corr_future = abs(s.corr(future_target))
 
             if corr_future > threshold_corr and (corr_future > corr_curr + 0.05 or np.isnan(corr_curr)):
-                findings.append({
-                    "check": "temporal_leakage",
-                    "severity": "CRITICAL",
-                    "column": col,
-                    "metric_value": round(float(corr_future), 4),
-                    "threshold": threshold_corr,
-                    "message": f"Feature '{col}' strongly correlates ({corr_future:.4f}) with next-step target '{target_col}[t+1]'. Lookahead feature leakage."
-                })
+                findings.append(Finding(
+                    check="temporal_leakage",
+                    severity=Severity.CRITICAL,
+                    column=col,
+                    metric_value=round(float(corr_future), 4),
+                    threshold=threshold_corr,
+                    message=f"Feature '{col}' strongly correlates ({corr_future:.4f}) with next-step target '{target_col}[t+1]'. Lookahead feature leakage."
+                ))
 
     return findings

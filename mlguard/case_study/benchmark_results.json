@@ -3,7 +3,7 @@
     "TP": 20,
     "FP": 0,
     "FN": 0,
-    "TN": 80,
+    "TN": 100,
     "Precision": 1.0,
     "Recall": 1.0,
     "F1": 1.0
@@ -12,7 +12,7 @@
     "TP": 10,
     "FP": 0,
     "FN": 0,
-    "TN": 90,
+    "TN": 110,
     "Precision": 1.0,
     "Recall": 1.0,
     "F1": 1.0
@@ -21,7 +21,7 @@
     "TP": 20,
     "FP": 0,
     "FN": 0,
-    "TN": 80,
+    "TN": 100,
     "Precision": 1.0,
     "Recall": 1.0,
     "F1": 1.0
@@ -30,7 +30,7 @@
     "TP": 10,
     "FP": 0,
     "FN": 0,
-    "TN": 90,
+    "TN": 110,
     "Precision": 1.0,
     "Recall": 1.0,
     "F1": 1.0
@@ -39,9 +39,27 @@
     "TP": 10,
     "FP": 2,
     "FN": 0,
-    "TN": 88,
+    "TN": 108,
     "Precision": 0.8333,
     "Recall": 1.0,
     "F1": 0.9091
+  },
+  "hidden_missing": {
+    "TP": 10,
+    "FP": 0,
+    "FN": 0,
+    "TN": 110,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
+  },
+  "temporal_leakage": {
+    "TP": 10,
+    "FP": 0,
+    "FN": 0,
+    "TN": 110,
+    "Precision": 1.0,
+    "Recall": 1.0,
+    "F1": 1.0
   }
 }

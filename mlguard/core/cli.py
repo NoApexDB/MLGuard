@@ -78,9 +78,6 @@ def audit(source, target_col, time_col, only, output_format, output_path, fail_o
         fail_on=fail_on,
     )
 
-    df = load_data(source)
-    findings = run_audit(df, target_col=config["target_col"], time_col=config["time_col"])
-
     checks_filter = None
     if only:
         checks_filter = {c.strip() for c in only.split(",") if c.strip()}
@@ -94,7 +91,14 @@ def audit(source, target_col, time_col, only, output_format, output_path, fail_o
                 f"Неизвестные чеки: {', '.join(sorted(unknown))}. "
                 f"Смотри `mlguard checks list`."
             )
-        findings = [f for f in findings if f.get("check") in checks_filter]
+
+    df = load_data(source)
+    findings = run_audit(
+        df,
+        target_col=config["target_col"],
+        time_col=config["time_col"],
+        checks=list(checks_filter) if checks_filter else None
+    )
 
     fmt = (config.get("format") or "table").lower()
     rendered = FORMATTERS[fmt](findings)

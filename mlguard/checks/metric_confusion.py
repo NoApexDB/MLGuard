@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import kendalltau
+from mlguard.core.domain import Finding, Severity
 
 
 def check_metric_confusion(
@@ -11,8 +12,8 @@ def check_metric_confusion(
     alpha: float = 0.05,
     min_tau: float = 0.25,
     max_pairs: int = 5
-) -> list[dict]:
-    findings = []
+) -> list[Finding]:
+    findings: list[Finding] = []
 
     if time_col is None:
         date_cols = df.select_dtypes(include=['datetime', 'datetime64']).columns
@@ -58,14 +59,14 @@ def check_metric_confusion(
         # Сортируем пары по силе расхождения и ограничиваем top-N
         pairs.sort(key=lambda x: x[0], reverse=True)
         for divergence, v_name, v_tau, v_p, h_name, h_tau, h_p in pairs[:max_pairs]:
-            findings.append({
-                'check': 'metric_confusion',
-                'severity': 'CRITICAL',
-                'column': f"{v_name} vs {h_name}",
-                'metric_value': round(float(v_p), 4),
-                'threshold': alpha,
-                'message': f"Metric divergence: '{v_name}' is increasing (tau={v_tau:.2f}, p={v_p:.4f}), while '{h_name}' is decreasing (tau={h_tau:.2f}, p={h_p:.4f})."
-            })
+            findings.append(Finding(
+                check='metric_confusion',
+                severity=Severity.CRITICAL,
+                column=f"{v_name} vs {h_name}",
+                metric_value=round(float(v_p), 4),
+                threshold=alpha,
+                message=f"Metric divergence: '{v_name}' is increasing (tau={v_tau:.2f}, p={v_p:.4f}), while '{h_name}' is decreasing (tau={h_tau:.2f}, p={h_p:.4f})."
+            ))
         return findings
 
     if vanity_col not in df.columns or health_col not in df.columns:
@@ -80,13 +81,13 @@ def check_metric_confusion(
     tau_h, pval_h = kendalltau(valid_h.index, valid_h[health_col])
 
     if (tau_v >= min_tau and pval_v < alpha) and (tau_h <= -min_tau and pval_h < alpha):
-        findings.append({
-            'check': 'metric_confusion',
-            'severity': 'CRITICAL',
-            'column': f"{vanity_col} vs {health_col}",
-            'metric_value': round(float(pval_v), 4),
-            'threshold': alpha,
-            'message': f"Metric divergence: '{vanity_col}' is increasing (tau={tau_v:.2f}, p={pval_v:.4f}), while '{health_col}' is decreasing (tau={tau_h:.2f}, p={pval_h:.4f})."
-        })
+        findings.append(Finding(
+            check='metric_confusion',
+            severity=Severity.CRITICAL,
+            column=f"{vanity_col} vs {health_col}",
+            metric_value=round(float(pval_v), 4),
+            threshold=alpha,
+            message=f"Metric divergence: '{vanity_col}' is increasing (tau={tau_v:.2f}, p={pval_v:.4f}), while '{health_col}' is decreasing (tau={tau_h:.2f}, p={pval_h:.4f})."
+        ))
 
     return findings

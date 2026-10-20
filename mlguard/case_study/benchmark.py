@@ -28,7 +28,9 @@ def generate_clean_dataset(seed: int) -> tuple[pd.DataFrame, dict[str, bool]]:
         "small_sample_guard": False,
         "churn_blindness": False,
         "metric_confusion": False,
-        "seasonality_sentiment": False
+        "seasonality_sentiment": False,
+        "hidden_missing": False,
+        "temporal_leakage": False,
     }
     return df, ground_truth
 
@@ -47,17 +49,13 @@ def generate_dirty_dataset(seed: int, pitfall_type: str) -> tuple[pd.DataFrame, 
         "small_sample_guard": False,
         "churn_blindness": False,
         "metric_confusion": False,
-        "seasonality_sentiment": False
+        "seasonality_sentiment": False,
+        "hidden_missing": False,
+        "temporal_leakage": False,
     }
     
     if pitfall_type == "leakage":
         ground_truth["leakage_detector"] = True
-        # feat_leak = target*100+noise is, by construction, also a massive
-        # distribution shift between target groups (KS D≈1.0) — churn_blindness
-        # correctly detects this too. Both checks are looking at the same
-        # underlying signal (a feature that strongly depends on target) through
-        # different statistical lenses, so this is a true positive for both,
-        # not a false alarm from churn_blindness.
         ground_truth["churn_blindness"] = True
         feat_leak = target * 100.0 + np.random.normal(0, 0.1, size=n)
         df = pd.DataFrame({
@@ -78,10 +76,6 @@ def generate_dirty_dataset(seed: int, pitfall_type: str) -> tuple[pd.DataFrame, 
         
     elif pitfall_type == "churn_blindness":
         ground_truth["churn_blindness"] = True
-        # salary is engineered to separate almost perfectly by target
-        # (r ≈ -0.96 in practice) — that's also a legitimate leakage-style
-        # correlation, not a leakage_detector false alarm. Same reasoning
-        # as the leakage branch above.
         ground_truth["leakage_detector"] = True
         salary = np.where(target == 1, np.random.normal(40000, 5000, n), np.random.normal(120000, 15000, n))
         df = pd.DataFrame({
@@ -111,6 +105,30 @@ def generate_dirty_dataset(seed: int, pitfall_type: str) -> tuple[pd.DataFrame, 
             "revenue": revenue,
             "target": target
         })
+
+    elif pitfall_type == "hidden_missing":
+        ground_truth["hidden_missing"] = True
+        str_feat = np.array(["valid_value"] * n, dtype=object)
+        mask = np.random.rand(n) < 0.15
+        str_feat[mask] = "?"
+        df = pd.DataFrame({
+            "date": dates,
+            "category": str_feat,
+            "feat1": feat1,
+            "target": target
+        })
+
+    elif pitfall_type == "temporal_leakage":
+        ground_truth["temporal_leakage"] = True
+        # Прямая временная утечка: колонка события из будущего
+        future_dates = dates + pd.Timedelta(days=10)
+        df = pd.DataFrame({
+            "date": dates,
+            "future_event_date": future_dates,
+            "feat1": feat1,
+            "target": target
+        })
+
     else:
         df, ground_truth = generate_clean_dataset(seed)
 
@@ -118,7 +136,15 @@ def generate_dirty_dataset(seed: int, pitfall_type: str) -> tuple[pd.DataFrame, 
 
 
 def evaluate_dataset_split(start_seed: int, num_clean: int = 50, num_dirty_per_type: int = 10) -> dict:
-    pitfall_types = ["leakage", "small_sample", "churn_blindness", "metric_confusion", "seasonality"]
+    pitfall_types = [
+        "leakage", 
+        "small_sample", 
+        "churn_blindness", 
+        "metric_confusion", 
+        "seasonality",
+        "hidden_missing",
+        "temporal_leakage"
+    ]
     
     datasets = []
     seed_counter = start_seed
@@ -134,7 +160,15 @@ def evaluate_dataset_split(start_seed: int, num_clean: int = 50, num_dirty_per_t
             datasets.append((df, gt))
             seed_counter += 1
 
-    checks = ["leakage_detector", "small_sample_guard", "churn_blindness", "metric_confusion", "seasonality_sentiment"]
+    checks = [
+        "leakage_detector", 
+        "small_sample_guard", 
+        "churn_blindness", 
+        "metric_confusion", 
+        "seasonality_sentiment",
+        "hidden_missing",
+        "temporal_leakage"
+    ]
     metrics = {c: {"TP": 0, "FP": 0, "TN": 0, "FN": 0} for c in checks}
     
     for df, gt in datasets:
@@ -179,14 +213,14 @@ def evaluate_dataset_split(start_seed: int, num_clean: int = 50, num_dirty_per_t
 
 
 def main():
-    # Held-Out Out-of-Sample Test Set evaluation (seed 5000-5099)
+    # Held-Out Out-of-Sample Test Set evaluation (все 7 модулей проверок)
     held_out_results = evaluate_dataset_split(start_seed=5000, num_clean=50, num_dirty_per_type=10)
     
     out_dir = Path(__file__).parent
     res_path = out_dir / "benchmark_results.json"
     res_path.write_text(json.dumps(held_out_results, indent=2), encoding="utf-8")
     
-    print("=== HELD-OUT TEST SET EVALUATION METRICS (Out-of-Sample) ===")
+    print("=== HELD-OUT TEST SET EVALUATION METRICS (Все 7 проверок) ===")
     print(f"{'Check Name':<25} | {'TP':<4} | {'FP':<4} | {'FN':<4} | {'TN':<4} | {'Precision':<9} | {'Recall':<8} | {'F1':<6}")
     print("-" * 85)
     for check_name, m in held_out_results.items():

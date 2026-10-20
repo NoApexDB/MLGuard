@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency, ks_2samp
+from mlguard.core.domain import Finding, Severity
 
 
 def check_churn_blindness(
@@ -8,8 +9,8 @@ def check_churn_blindness(
     status_col: str = None, 
     threshold_pvalue: float = 0.05,
     min_effect_size: float = 0.25
-) -> list[dict]:
-    findings = []
+) -> list[Finding]:
+    findings: list[Finding] = []
 
     if status_col is None:
         # Сначала ищем по характерным названиям колонок статуса/оттока
@@ -60,18 +61,18 @@ def check_churn_blindness(
             continue
 
         stat_result = ks_2samp(active_vals, churned_vals)
-        ks_stat = stat_result.statistic
-        p_val = stat_result.pvalue
+        ks_stat = float(stat_result.statistic)
+        p_val = float(stat_result.pvalue)
 
         if p_val < threshold_pvalue and ks_stat >= min_effect_size:
-            findings.append({
-                'check': 'churn_blindness',
-                'severity': 'CRITICAL',
-                'column': col,
-                'metric_value': round(float(p_val), 4),
-                'threshold': threshold_pvalue,
-                'message': f"Distribution shift detected for '{col}' between groups of '{status_col}' (D={ks_stat:.2f}, p-value={p_val:.4f})."
-            })
+            findings.append(Finding(
+                check='churn_blindness',
+                severity=Severity.CRITICAL,
+                column=col,
+                metric_value=round(float(p_val), 4),
+                threshold=threshold_pvalue,
+                message=f"Distribution shift detected for '{col}' between groups of '{status_col}' (D={ks_stat:.2f}, p-value={p_val:.4f})."
+            ))
 
     # 2. Анализ категориальных признаков через Chi-square тест сопряжённости
     cat_cols = df.select_dtypes(include=['object', 'category', 'string']).columns
@@ -94,14 +95,14 @@ def check_churn_blindness(
             cramers_v = float(np.sqrt(chi2 / (n_total * min_dim))) if n_total > 0 and min_dim > 0 else 0.0
 
             if p_val < threshold_pvalue and cramers_v >= min_effect_size:
-                findings.append({
-                    'check': 'churn_blindness',
-                    'severity': 'CRITICAL',
-                    'column': col,
-                    'metric_value': round(float(p_val), 4),
-                    'threshold': threshold_pvalue,
-                    'message': f"Categorical shift detected for '{col}' across '{status_col}' groups (Cramer's V={cramers_v:.2f}, p-value={p_val:.4f})."
-                })
+                findings.append(Finding(
+                    check='churn_blindness',
+                    severity=Severity.CRITICAL,
+                    column=col,
+                    metric_value=round(float(p_val), 4),
+                    threshold=threshold_pvalue,
+                    message=f"Categorical shift detected for '{col}' across '{status_col}' groups (Cramer's V={cramers_v:.2f}, p-value={p_val:.4f})."
+                ))
         except Exception:
             pass
 

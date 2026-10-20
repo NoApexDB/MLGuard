@@ -11,6 +11,7 @@
         "message": str,
     }
 """
+import html
 import json
 
 import click
@@ -71,14 +72,19 @@ def format_html(findings: list[dict]) -> str:
         sev = str(f.get("severity", "INFO")).upper()
         color = "#e53e3e" if sev == "CRITICAL" else ("#dd6b20" if sev == "WARNING" else "#3182ce")
         bg_color = "#fff5f5" if sev == "CRITICAL" else ("#fffaf0" if sev == "WARNING" else "#ebf8ff")
+        check_val = html.escape(str(f.get("check", "")))
+        col_val = html.escape(str(f.get("column", "")))
+        msg_val = html.escape(str(f.get("message", "")))
+        m_val = html.escape(str(f.get("metric_value", "")))
+        th_val = html.escape(str(f.get("threshold", "")))
         rows.append(f"""
         <tr>
             <td><span style="background:{bg_color}; color:{color}; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">{sev}</span></td>
-            <td><code>{f.get('check', '')}</code></td>
-            <td><b>{f.get('column', '')}</b></td>
-            <td>{f.get('metric_value', '')}</td>
-            <td>{f.get('threshold', '')}</td>
-            <td>{f.get('message', '')}</td>
+            <td><code>{check_val}</code></td>
+            <td><b>{col_val}</b></td>
+            <td>{m_val}</td>
+            <td>{th_val}</td>
+            <td>{msg_val}</td>
         </tr>""")
 
     tbody = "\n".join(rows) if rows else "<tr><td colspan='6' style='text-align:center; padding:20px; color:#38a169;'><b>✓ Проблем не найдено</b></td></tr>"

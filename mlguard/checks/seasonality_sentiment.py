@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.seasonal import STL
+from mlguard.core.domain import Finding, Severity
 
 
 def check_seasonality(
@@ -8,8 +9,8 @@ def check_seasonality(
     time_col: str = None, 
     target_col: str = None, 
     threshold_ratio: float = 0.35
-) -> list[dict]:
-    findings = []
+) -> list[Finding]:
+    findings: list[Finding] = []
 
     if time_col is None:
         date_cols = df.select_dtypes(include=['datetime', 'datetime64']).columns
@@ -47,8 +48,8 @@ def check_seasonality(
             continue
 
         best_ratio = 0.0
-        var_total = series.var()
-        if var_total == 0:
+        var_total = float(series.var())
+        if var_total == 0 or np.isnan(var_total):
             continue
 
         for p in candidate_periods:
@@ -57,20 +58,20 @@ def check_seasonality(
             try:
                 stl = STL(series, period=p)
                 res = stl.fit()
-                seasonal_ratio = res.seasonal.var() / var_total
+                seasonal_ratio = float(res.seasonal.var()) / var_total
                 if seasonal_ratio > best_ratio:
                     best_ratio = seasonal_ratio
             except Exception:
                 continue
 
         if best_ratio > threshold_ratio:
-            findings.append({
-                'check': 'seasonality_sentiment',
-                'severity': 'WARNING',
-                'column': col,
-                'metric_value': round(float(best_ratio), 4),
-                'threshold': threshold_ratio,
-                'message': f"High seasonality in '{col}': seasonal component explains {best_ratio:.1%} of total variance."
-            })
+            findings.append(Finding(
+                check='seasonality_sentiment',
+                severity=Severity.WARNING,
+                column=col,
+                metric_value=round(float(best_ratio), 4),
+                threshold=threshold_ratio,
+                message=f"High seasonality in '{col}': seasonal component explains {best_ratio:.1%} of total variance."
+            ))
 
     return findings
